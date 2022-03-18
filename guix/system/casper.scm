@@ -23,7 +23,7 @@
  (file-systems
   (cons*
    (file-system
-    (device (file-system-label "boot"))
+    (device (file-system-label "BOOT"))
     (mount-point "/boot/efi")
     (type "vfat"))
    (file-system
