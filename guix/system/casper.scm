@@ -15,7 +15,7 @@
  (firmware (list linux-firmware))
  (services (append (list
 		    (service gnome-desktop-service-type)
-		    (setx-xord-configuration
+		    (setx-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout keyboard-layout))))
 		   (operating-system-services magi)))
