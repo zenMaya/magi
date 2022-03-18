@@ -21,12 +21,11 @@
  (file-systems
   (cons*
    (file-system
-    (device "/dev/sda1")
+    (device (file-system-label "boot"))
     (mount-point "/boot/efi")
-    (type "vfat")
-    (file-system-label "boot"))
+    (type "vfat"))
    (file-system
-    (device "/dev/sda2")
+    (device (file-system-label "system"))
     (mount-point "/")
     (type "btrfs"))
    %base-file-systems)))
