@@ -2,6 +2,7 @@
   #:use-module (magi)
   #:use-module (gnu)
   #:use-module (gnu packages xorg)
+  #:use-module (gnu packages gnome)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd))
 
