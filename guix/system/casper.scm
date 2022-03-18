@@ -1,6 +1,7 @@
 (define-module (casper)
   #:use-module (magi)
   #:use-module (gnu)
+  #:use-module (gnu packages xorg)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd))
 

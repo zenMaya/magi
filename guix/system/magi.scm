@@ -1,5 +1,6 @@
 (define-module (magi)
   #:use-module (gnu)
+  #:use-module (gnu packages version-control)
   #:use-module (gnu packages linux))
  
 (define %xorg-libinput-config
@@ -25,7 +26,7 @@ EndSection
 
 (define-public magi
   (operating-system
-   (hostname "magi")
+   (host-name "magi")
    (timezone "Europe/Prague")
    (locale "en_US.utf8")
    (keyboard-layout
@@ -34,7 +35,7 @@ EndSection
 		 (bootloader grub-efi-bootloader)
 		 (target "/boot/efi")
 		 (keyboard-layout keyboard-layout)))
-    (filesystems (cons*
+    (file-systems (cons*
 		  (file-system
 		   (mount-point "/tmp")
 		   (device "none")
