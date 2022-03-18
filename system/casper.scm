@@ -8,6 +8,7 @@
  (inherit (magi))
  (host-name "casper")
  (kernel linux)
+ (initrd microcode-initrd)
  (firmware (list linux-firmware))
  (services (append (list
 		    (service gnome-desktop-service-type)
