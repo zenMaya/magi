@@ -1,6 +1,5 @@
 (define-module (magi)
   #:use-module (gnu)
-  #:use-module (gnu services networking)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages linux))
@@ -62,5 +61,4 @@ EndSection
 		       ntfs-3g
 		       fuse-exfat
 		       emacs)
-		      %base-packages))
-    (services (cons* (service openssh-service-type)))))
+		      %base-packages))))
