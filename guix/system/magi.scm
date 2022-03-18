@@ -38,7 +38,7 @@ EndSection
 		 (keyboard-layout keyboard-layout)))
     (file-systems (cons*
 		  (file-system
-		   (mount-point "/tmp")
+		   (mount-point "/")
 		   (device "none")
 		   (type "tmpfs")
 		   (check? #f))

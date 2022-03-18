@@ -19,7 +19,7 @@
 		    (set-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout keyboard-layout))))
-		   (operating-system-services magi)) %desktop-services))
+		   %desktop-services) (operating-system-services magi)))
  (packages (append (list
 		    xf86-input-libinput)
 		   (operating-system-packages magi)))
