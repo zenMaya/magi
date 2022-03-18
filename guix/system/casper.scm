@@ -1,5 +1,5 @@
 (define-module (casper)
-  #:use-module (magi)
+  #:use-module (magi-system)
   #:use-module (gnu)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
@@ -9,7 +9,7 @@
   #:use-module (nongnu system linux-initrd))
 
 (operating-system
- (inherit magi-os)
+ (inherit magi)
  (host-name "casper")
  (kernel linux)
  (initrd microcode-initrd)

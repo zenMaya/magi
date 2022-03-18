@@ -1,4 +1,4 @@
-(define-module (magi)
+(define-module (magi-system)
   #:use-module (gnu)
   #:use-module (gnu services networking ssh)
   #:use-module (gnu packages version-control)
@@ -26,7 +26,7 @@ Section \"InputClass\"
 EndSection
 ")
 
-(define-public magi-os
+(define-public magi
   (operating-system
    (host-name "magi")
    (timezone "Europe/Prague")
