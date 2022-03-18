@@ -61,4 +61,5 @@ EndSection
 		       ntfs-3g
 		       fuse-exfat
 		       emacs)
-		      %base-packages))))
+		      %base-packages))
+    (services %base-services)))

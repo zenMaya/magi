@@ -14,12 +14,12 @@
  (kernel linux)
  (initrd microcode-initrd)
  (firmware (list linux-firmware))
- (services (append (append (list
+ (services (append (list
 		    (service gnome-desktop-service-type)
 		    (set-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout keyboard-layout))))
-		   %desktop-services) (operating-system-services magi)))
+		   %desktop-services (operating-system-services magi)))
  (packages (append (list
 		    xf86-input-libinput)
 		   (operating-system-packages magi)))
