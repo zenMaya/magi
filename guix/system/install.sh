@@ -1,4 +1,4 @@
-#!/bin/sh
+#!bash
 
 if [test $1="casper"]; then
      mkfs.fat -F32 -n boot $2
