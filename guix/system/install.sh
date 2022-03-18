@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [[$1="casper"]]; then
+if [test $1="casper"]; then
      mkfs.fat -F32 -n boot $2
      mkfs.btrfs -L system $3
 else
