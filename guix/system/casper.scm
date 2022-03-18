@@ -14,6 +14,7 @@
  (kernel linux)
  (initrd microcode-initrd)
  (firmware (list linux-firmware))
+ (keyboard-layout (keyboard-layout "cz" "dvorak-ucw" #:options '("ctrl:nocaps")))
  (services (append (list
 		    (service gnome-desktop-service-type)
 		    (set-xorg-configuration
