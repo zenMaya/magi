@@ -32,7 +32,7 @@ EndSection
     (keyboard-layout "cz" "dvorak-ucw" #:options '("ctrl:nocaps")))
     (bootloader (bootloader-configuration
 		 (bootloader grub-efi-bootloader)
-		 (target "/boot/ef")
+		 (target "/boot/efi")
 		 (keyboard-layout keyboard-layout)))
     (filesystems (cons*
 		  (file-system
