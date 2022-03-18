@@ -3,7 +3,6 @@
   #:use-module (gnu)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
-  #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
   #:use-module (nongnu packages linux)
   #:use-module (nongnu system linux-initrd))
@@ -16,7 +15,7 @@
  (firmware (list linux-firmware))
  (services (append (append (list
 		    (service gnome-desktop-service-type)
-		    (setx-xorg-configuration
+		    (set-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout keyboard-layout))))
 		   (operating-system-services magi)) %desktop-services))
