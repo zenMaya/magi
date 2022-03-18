@@ -2,6 +2,7 @@
   #:use-module (magi)
   #:use-module (gnu)
   #:use-module (gnu services desktop)
+  #:use-module (gnu services xorg)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
   #:use-module (nongnu packages linux)
