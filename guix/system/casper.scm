@@ -1,5 +1,5 @@
 (define-module (casper)
-  #:use-module (magi-system)
+  #:use-module (magi)
   #:use-module (gnu)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)

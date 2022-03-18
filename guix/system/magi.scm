@@ -1,6 +1,6 @@
-(define-module (magi-system)
+(define-module (magi)
   #:use-module (gnu)
-  #:use-module (gnu services networking ssh)
+  #:use-module (gnu services networking)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages linux))
