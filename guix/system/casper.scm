@@ -9,7 +9,7 @@
   #:use-module (nongnu system linux-initrd))
 
 (operating-system
- (inherit magi)
+ (inherit magi-os)
  (host-name "casper")
  (kernel linux)
  (initrd microcode-initrd)

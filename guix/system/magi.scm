@@ -26,7 +26,7 @@ Section \"InputClass\"
 EndSection
 ")
 
-(define-public magi
+(define-public magi-os
   (operating-system
    (host-name "magi")
    (timezone "Europe/Prague")
