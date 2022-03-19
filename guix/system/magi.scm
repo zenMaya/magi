@@ -58,6 +58,7 @@ EndSection
 		 %base-user-accounts))
     (packages (append (list
 		       git
+               nss-certs
 		       ntfs-3g
 		       fuse-exfat
 		       emacs)
