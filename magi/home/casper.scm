@@ -5,12 +5,14 @@
   #:use-module (gnu home services shells)
   #:use-module (gnu services)
   #:use-module (gnu packages web-browsers)
-  #:use-module (gnu packages ssh))
+  #:use-module (gnu packages ssh)
+  #:use-module (gnu packages emacs))
 
 (home-environment
  (packages `(
 	     ,@development-packages
-	     ,openssh))
+	     ,openssh
+       ,emacs-geiser))
  (services
   (list
    (service home-fish-service-type
