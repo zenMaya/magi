@@ -1,5 +1,5 @@
-(define-module (casper)
-  #:use-module (magi)
+(define-module (magi system casper)
+  #:use-module (magi system)
   #:use-module (gnu)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
@@ -14,13 +14,13 @@
  (kernel linux)
  (initrd microcode-initrd)
  (firmware (list linux-firmware))
- (keyboard-layout (keyboard-layout "cz" "dvorak-ucw" #:options '("ctrl:nocaps")))
+ (keyboard-layout dvorak-ucw)
  (services (append (list
 		    (service gnome-desktop-service-type)
 		    (set-xorg-configuration
 		     (xorg-configuration
-		      (keyboard-layout keyboard-layout))))
-		   %desktop-services))
+		      (keyboard-layout dvorak-ucw))))
+		   nonguix-desktop-services))
  (packages (append (list
 		    xf86-input-libinput)
 		   (operating-system-packages magi)))

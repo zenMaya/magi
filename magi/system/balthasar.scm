@@ -1,4 +1,4 @@
-(define-module (balthasar)
+(define-module (magi system balthasar)
   #:use-module (magi)
   #:use-module (gnu))
 

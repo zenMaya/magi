@@ -1,8 +1,10 @@
-(define-module (magi)
+(define-module (magi system)
   #:use-module (gnu)
+  #:use-module (gnu services desktop)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages certs)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages shells)
   #:use-module (gnu packages linux))
  
 (define %xorg-libinput-config
@@ -11,7 +13,6 @@
   Driver \"libinput\"
   MatchDevicePath \"/dev/input/event*\"
   MatchIsTouchpad \"on\"
-
   Option \"Tapping\" \"on\"
   Option \"TappingDrag\" \"on\"
   Option \"DisableWhileTyping\" \"on\"
@@ -26,13 +27,29 @@ Section \"InputClass\"
 EndSection
 ")
 
+(define-public dvorak-ucw (keyboard-layout "cz" "dvorak-ucw" #:options '("ctrl:nocaps")))
+
+(define-public nonguix-desktop-services (modify-services %desktop-services
+             (guix-service-type config => (guix-configuration
+               (inherit config)
+               (substitute-urls
+                (append (list "https://substitutes.nonguix.org")
+                  %default-substitute-urls))
+               (authorized-keys
+                (append (list (plain-file "non-guix.pub" "(public-key 
+ (ecc 
+  (curve Ed25519)
+  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
+  )
+ )"))
+                  %default-authorized-guix-keys))))))
+
 (define-public magi
   (operating-system
    (host-name "magi")
    (timezone "Europe/Prague")
    (locale "en_US.utf8")
-   (keyboard-layout
-    (keyboard-layout "cz" "dvorak-ucw" #:options '("ctrl:nocaps")))
+   (keyboard-layout dvorak-ucw)
     (bootloader (bootloader-configuration
 		 (bootloader grub-efi-bootloader)
 		 (target "/boot/efi")
@@ -47,6 +64,7 @@ EndSection
     (users (cons (user-account
 		  (name "maya")
 		  (comment "Mája")
+		  (shell (file-append fish "/bin/fish"))
 		  (group "users")
 		  (home-directory "/home/maya")
 		  (supplementary-groups '(
