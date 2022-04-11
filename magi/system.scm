@@ -4,6 +4,7 @@
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages certs)
   #:use-module (gnu packages emacs)
+  #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages shells)
   #:use-module (gnu packages linux))
  
@@ -80,6 +81,9 @@ EndSection
                nss-certs
 		       ntfs-3g
 		       fuse-exfat
-		       emacs)
+		       emacs
+		       emacs-geiser
+		       emacs-geiser-guile
+		       emacs-project)
 		      %base-packages))
     (services %base-services)))
