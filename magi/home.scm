@@ -1,1 +1,0 @@
-(define-module (magi home))
