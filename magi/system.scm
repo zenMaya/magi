@@ -4,7 +4,10 @@
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages certs)
   #:use-module (gnu packages emacs)
-  #:use-module (gnu packages linux))
+  #:use-module (gnu packages emacs-xyz)
+  #:use-module (gnu packages shells)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages ssh))
  
 (define %xorg-libinput-config
   "Section \"InputClass\"
@@ -63,6 +66,7 @@ EndSection
     (users (cons (user-account
 		  (name "maya")
 		  (comment "Mája")
+		  (shell (file-append fish "/bin/fish"))
 		  (group "users")
 		  (home-directory "/home/maya")
 		  (supplementary-groups '(
@@ -78,6 +82,7 @@ EndSection
                nss-certs
 		       ntfs-3g
 		       fuse-exfat
-		       emacs)
+		       emacs
+		       openssh)
 		      %base-packages))
     (services %base-services)))
