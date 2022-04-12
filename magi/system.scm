@@ -6,7 +6,8 @@
   #:use-module (gnu packages emacs)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages shells)
-  #:use-module (gnu packages linux))
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages ssh))
  
 (define %xorg-libinput-config
   "Section \"InputClass\"
@@ -82,8 +83,6 @@ EndSection
 		       ntfs-3g
 		       fuse-exfat
 		       emacs
-		       emacs-geiser
-		       emacs-geiser-guile
-		       emacs-project)
+		       openssh)
 		      %base-packages))
     (services %base-services)))
