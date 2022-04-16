@@ -78,11 +78,12 @@ EndSection
 					  "video")))
 		 %base-user-accounts))
     (packages (append (list
-		       git
-               nss-certs
+		       (specification->package+output "git:send-email")
+		       nss-certs
 		       ntfs-3g
 		       fuse-exfat
 		       emacs
+		       btrfs-progs
 		       openssh)
 		      %base-packages))
     (services %base-services)))

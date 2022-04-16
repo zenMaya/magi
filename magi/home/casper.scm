@@ -3,18 +3,21 @@
   #:use-module (gnu home)
   #:use-module (gnu home services)
   #:use-module (gnu home services shells)
-  #:use-module (gnu services))
+  #:use-module (gnu services)
+  #:use-module (guix gexp))
 
 (home-environment
  (packages `(
+	     ,@fonts
+	     ,@utilities
 	     ,@browsers
 	     ,@haskell-toolchain
 	     ,@zig-toolchain
 	     ,@rust-toolchain
 	     ,@guile-toolchain
-	     ,@emacs-packages
 	     ))
  (services
-  (list
-   (service home-fish-service-type
-	    (home-fish-configuration)))))
+  `(
+    ,@emacs-services
+    ,(service home-fish-service-type
+	      (home-fish-configuration)))))
