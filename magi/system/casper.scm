@@ -20,7 +20,10 @@
 		    (set-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout dvorak-ucw))))
-		   nonguix-desktop-services))
+		   (modify-services nonguix-desktop-services
+				    (gdm-service-type config => (gdm-configuration
+								 (inherit config)
+								 (wayland? #t))))))
  (packages (append (list
 		    xf86-input-libinput)
 		   (operating-system-packages magi)))
