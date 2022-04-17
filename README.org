@@ -1,0 +1,7 @@
+* Bootstrapping
+#+begin_src bash
+wget https://github.com/zenMaya/magi/tarball/main
+tar -xf magi
+cd <dirname>
+./install.sh <machine name> <boot partition> <system partition>
+#+end_src 
