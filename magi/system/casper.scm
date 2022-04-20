@@ -3,6 +3,7 @@
   #:use-module (gnu)
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
+  #:use-module (gnu services syncthing)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
   #:use-module (nongnu packages linux)
@@ -19,13 +20,18 @@
 		    (service gnome-desktop-service-type)
 		    (set-xorg-configuration
 		     (xorg-configuration
-		      (keyboard-layout dvorak-ucw))))
+		      (keyboard-layout dvorak-ucw)))
+		    (service syncthing-service-type
+			     (syncthing-configuration
+			      (user "maya")
+			      (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000")))))
 		   (modify-services nonguix-desktop-services
 				    (gdm-service-type config => (gdm-configuration
 								 (inherit config)
 								 (wayland? #t))))))
  (packages (append (list
-		    xf86-input-libinput)
+		    xf86-input-libinput
+		    (specification->package "syncthing"))
 		   (operating-system-packages magi)))
  (file-systems
   (cons*

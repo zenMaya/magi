@@ -15,9 +15,11 @@
 	     ,@zig-toolchain
 	     ,@rust-toolchain
 	     ,@guile-toolchain
+	     ,syncthing-package
 	     ))
  (services
   `(
     ,@emacs-services
+  ; ,syncthing-services
     ,(service home-fish-service-type
 	      (home-fish-configuration)))))

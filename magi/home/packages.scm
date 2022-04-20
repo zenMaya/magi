@@ -3,6 +3,7 @@
   #:use-module (gnu home)
   #:use-module (gnu packages)
   #:use-module (gnu services)
+  #:use-module (gnu services syncthing)
   #:use-module (gnu home services)
   #:use-module (gnu packages emacs)
   #:use-module (rde packages emacs)
@@ -66,14 +67,6 @@ selected date) alongside a view of your agenda displaying timestamped entries.
 The agenda can be navigated using arrows keys and killed using \"q\", \"return\" or
 \"escape\".")
    (license license:gpl3+)))
-
-(define-public universal-media-server
-  (package
-   (name "universal-media-server")
-   (version "10.19.0")
-   (source
-    (origin
-     (methon )))))
 
 (define-public fonts
   (map specification->package
@@ -151,3 +144,11 @@ The agenda can be navigated using arrows keys and killed using \"q\", \"return\"
 	    (home-emacs-configuration
 	     (package emacs-next-pgtk)
 	     (elisp-packages emacs-packages)))))
+
+(define-public syncthing-package
+  (specification->package "syncthing"))
+
+(define-public syncthing-services
+  (service syncthing-service-type
+	   (syncthing-configuration
+	    (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000")))))
