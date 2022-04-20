@@ -30,14 +30,16 @@
    (home-page "https://github.com/rougier/nano-theme")
    (synopsis "N Λ N O theme")
    (description
-    "N Λ N O theme is a consistent theme that comes in two flavors:  - a light theme
-that is based on Material (https://material.io/)  - a dark theme that is based
-on Nord (https://www.nordtheme.com/).
+    "N Λ N O theme is a consistent theme that comes in two flavors: 
+@itemize
+@item a light theme that is based on Material (@url{https://material.io/})
+@item a dark theme that is based on Nord (@url{https://www.nordtheme.com/})
+@end itemize
 
 A theme is fully defined by a set of (1+6) faces as explained in this paper
-https://arxiv.org/abs/2008.06030
+@url{https://arxiv.org/abs/2008.06030}
 
-Recommended font is \"Roboto Mono\" or \"Roboto Mono Nerd\" if you want to benefit
+Recommended font is \"Roboto Mono\" (package @code{fonts-google-roboto}) or \"Roboto Mono Nerd\" if you want to benefit
 from all the fancy glyphs.")
    (license license:gpl3+)))
 
@@ -65,6 +67,13 @@ The agenda can be navigated using arrows keys and killed using \"q\", \"return\"
 \"escape\".")
    (license license:gpl3+)))
 
+(define-public universal-media-server
+  (package
+   (name "universal-media-server")
+   (version "10.19.0")
+   (source
+    (origin
+     (methon )))))
 
 (define-public fonts
   (map specification->package

@@ -12,8 +12,13 @@
 (setq backup-directory-alist
       `(("." . "~/.local/share/emacs/saves/")))
 
+;;; Bindings
+
 (global-set-key (kbd "C-z") 'ignore)
 (global-set-key (kbd "C-x C-z") 'ignore)
+(global-unset-key (kbd "C-x +"))
+(global-unset-key (kbd "C-x ="))
+(global-set-key (kbd "C-x =") 'balance-windows)
 
 ;;; General
 
