@@ -33,6 +33,10 @@
 		    xf86-input-libinput
 		    (specification->package "syncthing"))
 		   (operating-system-packages magi)))
+ (mapped-devices
+  (list (mapped-device
+         (target "cryptroot")
+         (type luks-device-mapping))))
  (file-systems
   (cons*
    (file-system
@@ -40,7 +44,8 @@
     (mount-point "/boot/efi")
     (type "vfat"))
    (file-system
-    (device (file-system-label "system"))
+    (device "/dev/mapper/cryptroot")
     (mount-point "/")
-    (type "btrfs"))
+    (type "btrfs")
+    (dependencies mapped-devices))
    %base-file-systems)))
