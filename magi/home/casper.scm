@@ -9,17 +9,24 @@
 (home-environment
  (packages `(
 	     ,@fonts
+	     ,@sway-desktop
 	     ,@utilities
 	     ,@browsers
+	     ,@cc-toolchain
+	     ,@avr-toolchain
 	     ,@haskell-toolchain
-	     ,@zig-toolchain
-	     ,@rust-toolchain
+             ,@racket-toolchain
 	     ,@guile-toolchain
-	     ,syncthing-package
-	     ))
+	     ,@python-toolchain
+             ,@coq-toolchain
+	     ,syncthing-package))
  (services
   `(
     ,@emacs-services
+    ,@sway-services
+    ,@configuration-services
   ; ,syncthing-services
     ,(service home-fish-service-type
-	      (home-fish-configuration)))))
+	      (home-fish-configuration
+	       (environment-variables '(
+					("PATH" . "$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"))))))))

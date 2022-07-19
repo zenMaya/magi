@@ -4,6 +4,7 @@
   #:use-module (gnu services desktop)
   #:use-module (gnu services xorg)
   #:use-module (gnu services syncthing)
+  #:use-module (gnu services docker)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages gnome)
   #:use-module (nongnu packages linux)
@@ -21,6 +22,9 @@
 		    (set-xorg-configuration
 		     (xorg-configuration
 		      (keyboard-layout dvorak-ucw)))
+		    (bluetooth-service #:auto-enable? #t)
+		    (service docker-service-type
+			     (docker-configuration))
 		    (service syncthing-service-type
 			     (syncthing-configuration
 			      (user "maya")
@@ -29,14 +33,21 @@
 				    (gdm-service-type config => (gdm-configuration
 								 (inherit config)
 								 (wayland? #t))))))
- (packages (append (list
-		    xf86-input-libinput
-		    (specification->package "syncthing"))
-		   (operating-system-packages magi)))
- (mapped-devices
-  (list (mapped-device
-         (target "cryptroot")
-         (type luks-device-mapping))))
+ (packages (append
+	    (operating-system-packages magi)
+	    (map specification->package
+		 (list
+		  "syncthing"
+		  "sway"
+		  "xf86-input-libinput"
+		  "flatpak"
+		  "fuse"
+		  "podman"
+		  "docker"
+                  "runc"
+		  "iptables"
+		  "intel-media-driver"
+		  "shadow"))))
  (file-systems
   (cons*
    (file-system
@@ -44,8 +55,7 @@
     (mount-point "/boot/efi")
     (type "vfat"))
    (file-system
-    (device "/dev/mapper/cryptroot")
+    (device (file-system-label "guix"))
     (mount-point "/")
-    (type "btrfs")
-    (dependencies mapped-devices))
+    (type "btrfs"))
    %base-file-systems)))

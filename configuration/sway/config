@@ -1,0 +1,103 @@
+# # Inputs
+
+# input * {
+#       xkb_layout "cz"
+#       xkb_variant "dvorak-ucw"
+#       xkb_options "ctrl:nocaps"
+# }
+
+# input "Trackball" {
+#       scroll_button button8
+# }
+
+# input type:touchpad {
+#       tap enabled
+#       natural_scroll enabled
+#       dwt enabled
+# }
+
+# # Outputs
+
+# set $laptop-monitor eDP-1
+# set $desktop-monitor "Dell Inc. DELL U2412M 0FFXD33M4E0S"
+# set $tv-monitor "Sony SONY TV 0x00000101"
+
+# output $laptop-monitor pos 0 0
+# output $desktop-monitor pos 0 -1200
+# output $tv-monitor pos -1360 0
+
+# # General setup
+
+# exec dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK
+# exec wl-paste -t text --watch clipman store --no-persist
+
+# # Theming
+
+# #output * bg ./the-great-wawe-off-kanagawa.jpg fill
+
+# #set $opacity 0.8
+# #for_window [app_id="Alacritty"] opacity $opacity
+# #for_window [class=".*"] opacity $opacity
+# #for_window [app_id=".*"] opacity $opacity
+
+# default_border pixel
+# default_floating_border pixel
+
+# gaps outer 10
+# gaps inner 20
+
+#set $menu j4-dmenu-desktop --dmenu='bemenu -i --nb "#3f3f3f" --nf "#dcdccc"j4' --term='alacritty'
+
+set $mod Mod4
+#set $term alacritty
+
+#bar swaybar_command waybar
+
+#bindsym $mod+Return exec $term
+#bindsym $mod+Space exec ($menu)
+
+#set $ws1 "Development"
+#set $ws2 "Browser"
+
+# workspace_auto_back_and_forth yes
+
+# bindsym $mod+1 workspace $ws1
+# bindsym $mod+2 workspace $ws2
+
+# bindsym $mod+Shift+1 move container to workspace $ws1
+# bindsym $mod+Shift+2 move container to workspace $ws2
+
+# move workspace to output
+#bindsym $mod+Control+Shift+$left  move workspace to output left
+#bindsym $mod+Control+Shift+$right move workspace to output right
+#bindsym $mod+Control+Shift+$up    move workspace to output up
+#bindsym $mod+Control+Shift+$down  move workspace to output down
+# move workspace to output with arrow keys
+# bindsym $mod+Control+Shift+Left  move workspace to output $tv-monitor
+# bindsym $mod+Control+Shift+Right move workspace to output $laptop-monitor
+# bindsym $mod+Control+Shift+Up    move workspace to output $desktop-monitor
+# bindsym $mod+Control+Shift+Down  move workspace to output $laptop-monitor
+
+mode "s-x" {
+     bindsym 2 splith; mode "default"
+     bindsym 3 splitv; mode "default"
+     bindsym $mod+c exec [ "$(printf "No\nYes" | bemenu -i -p "Are you sure you want to quit sway?")" == "Yes" ] && swaymsg exit || swaymsg mode "default"
+     bindsym $mod+k kill; mode "default"
+     bindsym $mod+b exec (swaymsg -t get_tree | jq -r '.nodes[1].nodes[].nodes[] | .. | (.id|tostring) + " " + .name?' | grep -e "[0-9]* ."  ) | bemenu -i | awk '{print $1}' -- focus; mode "default"
+
+     bindsym $mod+g mode "default"
+     bindsym Escape mode "default"
+     bindsym Ctrl+g mode "default"
+}
+bindsym $mod+x mode "s-x"
+
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86Search exec bemenu-run

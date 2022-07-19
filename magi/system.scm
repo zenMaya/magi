@@ -75,15 +75,19 @@ EndSection
 					  "input"
 					  "lp"
 					  "audio"
-					  "video")))
+					  "video"
+					  "docker"
+					  "dialout")))
 		 %base-user-accounts))
-    (packages (append (list
-		       (specification->package+output "git:send-email")
-		       nss-certs
-		       ntfs-3g
-		       fuse-exfat
-		       emacs
-		       btrfs-progs
-		       openssh)
+    (packages (append (map specification->package+output
+                           (list
+                            "git:send-email"
+                            "nss-certs"
+                            "ntfs-3g"
+                            "dosfstools"
+                            "fuse-exfat"
+                            "emacs"
+                            "btrfs-progs"
+                            "openssh"))
 		      %base-packages))
     (services %base-services)))
