@@ -2,7 +2,7 @@
   #:use-module (gnu))
 
 (operating-system
- (inherit (magi))
+ (inherit (magi "balthasar"))
  (host-name "balthasar")
 
  ;;todo

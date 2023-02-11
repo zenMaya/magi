@@ -19,8 +19,12 @@
 ;; $ guix system disk-image nongnu/system/install.scm
 
 (define-module (magi system system-image)
+  #:use-module (ice-9 match)
+  #:use-module (guix gexp)
   #:use-module (gnu system)
   #:use-module (gnu system install)
+  #:use-module (gnu services)
+  #:use-module (gnu services base)
   #:use-module (gnu packages file-systems)
   #:use-module (gnu packages version-control)
   #:use-module (gnu packages curl)
@@ -33,18 +37,18 @@
 
 (define installation-os-nonfree
   (operating-system
-    (inherit installation-os)
-    (kernel linux)
-    (firmware (list linux-firmware))
+   (inherit installation-os)
+   (kernel linux)
+   (firmware (list linux-firmware))
 
-    ;; Add the 'net.ifnames' argument to prevent network interfaces
-    ;; from having really long names.  This can cause an issue with
-    ;; wpa_supplicant when you try to connect to a wifi network.
-    (kernel-arguments '("quiet" "modprobe.blacklist=radeon" "net.ifnames=0"))
+   ;; Add the 'net.ifnames' argument to prevent network interfaces
+   ;; from having really long names.  This can cause an issue with
+   ;; wpa_supplicant when you try to connect to a wifi network.
+   (kernel-arguments '("quiet" "modprobe.blacklist=radeon" "net.ifnames=0"))
 
-    ;; Add some extra packages useful for the installation process
-    (packages
-     (append (list exfat-utils fuse-exfat git curl stow emacs-no-x-toolkit)
-             (operating-system-packages installation-os)))))
+   ;; Add some extra packages useful for the installation process
+   (packages
+    (append (list exfat-utils fuse-exfat git curl stow emacs-no-x-toolkit)
+            (operating-system-packages installation-os)))))
 
 installation-os-nonfree

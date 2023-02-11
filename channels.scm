@@ -1,3 +1,6 @@
+(define-module (channels)
+  #:use-module (guix channels))
+
 (list
  (channel
   (name 'rde)

@@ -1,0 +1,15 @@
+version: "3.5"
+services:
+  jellyfin-old:
+    image: jellyfin/jellyfin
+    container_name: jellyfin-old
+    user: 114:120
+    network_mode: "host"
+    environment:
+      - JELLYFIN_CACHE_DIR=/opt/jellyfin/cache
+      - JELLYFIN_CONFIG_DIR=/opt/jellyfin/config
+      - JELLYFIN_DATA_DIR=/opt/jellyfin/data
+      - JELLYFIN_LOG_DIR=/opt/jellyfin/log
+    volumes:
+      - /media/huge/jellyfin-opt:/opt/jellyfin
+      - /media/huge:/media/big
