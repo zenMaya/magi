@@ -838,7 +838,8 @@ workspaces manually.")
         "font-awesome"
         "font-iosevka"
         "font-iosevka-aile"
-        "font-iosevka-term")))
+        "font-iosevka-term"
+        "font-tex-gyre")))
 
 (define-public sway-desktop
   (map specification->package
@@ -885,7 +886,8 @@ workspaces manually.")
        (list
         "maxima"
         "wxmaxima"
-        "texlive")))
+        "texlive"
+        "python-pygments")))
 
 (define-public browsers
   (append 
@@ -904,11 +906,12 @@ workspaces manually.")
          "flatpak"
          "vlc"
          ;;         "steam-devices-udev-rules"
-         ;;         "calibre"
+         "calibre"
          "darktable"
          "mpv"
-         "gaupol"
-         "font-openmoji"))))
+;;;         "gaupol"
+         "font-openmoji"
+         "transmission-remote-gtk"))))
 
 (define-public games
   (list
@@ -917,10 +920,25 @@ workspaces manually.")
    decaf-emu
    yuzu))
 
+(define-public music
+  (map specification->package
+       (list
+        "musescore"
+        "ardour"
+        "zam-plugins"
+        "lv2-mda-piano"
+        "dpf-plugins"
+        "caps-plugins-lv2"
+        "avldrums-lv2"
+        "hydrogen"
+        "helm"
+        "qsynth"
+        "amsynth")))
+
 (define-public virtualization
   (list
    qemu
-   spice
+;;   spice
    ovmf
    virt-manager))
 
@@ -928,18 +946,28 @@ workspaces manually.")
   (map specification->package
        (list
         "gcc-toolchain"
+        "man-pages"
         "meson"
+        "ninja"
         "make"
         "gdb"
+        "rr"
         "pkg-config"
         "cmake"
         "automake"
         "autoconf"
         "libtool"
-        ;; "ccls"
-        "clang-toolchain"
+        "ccls"
+        ;;"clang-toolchain"
         "bear"
-        "doxygen")))
+        "doxygen"
+        "gmp"
+        "mpfr")))
+
+(define-public jvm-toolchain
+  (map specification->package
+       (list
+        "openjdk")))
 
 (define-public avr-toolchain
   (map specification->package
@@ -1133,8 +1161,8 @@ workspaces manually.")
      (map
       (lambda (p)
         (let ((x (package-name p)))
-	  (mixed-text-file "z"
-	   "source " p (format #f "/share/zsh/plugins/~a/~a.zsh" x x))))
+          (mixed-text-file "z"
+           "source " p (format #f "/share/zsh/plugins/~a/~a.zsh" x x))))
       packages))))
 
 (define home-zsh-plugin-manager-service-type
@@ -1146,8 +1174,8 @@ workspaces manually.")
                        (service-extension
                         home-profile-service-type
                         identity)))
-		(compose concatenate)
-		(extend append)
+                (compose concatenate)
+                (extend append)
                 (default-value '())
                 (description "\
 Install plugins into the home profile and configure Zsh to load them.")))
@@ -1162,16 +1190,20 @@ Install plugins into the home profile and configure Zsh to load them.")))
       home-zsh-service-type
       (const
        (home-zsh-extension
-	;; We set variables in zshrc because we need them only in
-	;; interactive shell.
-	(zshrc '("# Improve the behavior and perfomance of auto suggestions"
-		 "ZSH_AUTOSUGGEST_MANUAL_REBIND=true"
-		 "ZSH_AUTOSUGGEST_USE_ASYNC=true"
-		 "ZSH_AUTOSUGGEST_STRATEGY=(history completion)")))))))
+        ;; We set variables in zshrc because we need them only in
+        ;; interactive shell.
+        (zshrc '("# Improve the behavior and perfomance of auto suggestions"
+                 "ZSH_AUTOSUGGEST_MANUAL_REBIND=true"
+                 "ZSH_AUTOSUGGEST_USE_ASYNC=true"
+                 "ZSH_AUTOSUGGEST_STRATEGY=(history completion)")))))))
    (default-value zsh-autosuggestions)
    (description "Enable Fish-like fast and unobtrusive autosuggestions
 for Zsh, and set reasonable default values for some plugin's variables
 to improve perfomance.")))
+
+(define-public fish-services
+  (list home-fish-service-type
+        (home-fish-configuration)))
 
 (define-public zsh-services
   (list
@@ -1183,11 +1215,13 @@ to improve perfomance.")))
             (home-zsh-configuration
              (xdg-flavor? #t)
              (environment-variables '(("PATH" . "$HOME/.local/bin:$PATH")))
+             ;;                          ("LIBRARY_PATH" . "$LIBRARY_PATH:/run/current-system/profile/lib")
+             ;;                          ("LD_LIBRARY_PATH" . "$HOME/.config/guix/profile/lib:$HOME/.guix-home/profile/lib:/run/current-system/profile/lib")))
              (zshrc (list (mixed-text-file "z" "
 # Improve the behavior and perfomance of auto suggestions"
-                 "ZSH_AUTOSUGGEST_MANUAL_REBIND=true"
-                 "ZSH_AUTOSUGGEST_USE_ASYNC=true"
-                 "ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+                           "ZSH_AUTOSUGGEST_MANUAL_REBIND=true"
+                           "ZSH_AUTOSUGGEST_USE_ASYNC=true"
+                           "ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
 # Local Variables:
 # mode: sh

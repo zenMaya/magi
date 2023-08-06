@@ -60,6 +60,23 @@
   (window-setup . toggle-frame-maximized)
   (text-mode . auto-fill-mode))
 
+(defun set-exec-path-from-shell-PATH ()
+  "Set up Emacs' `exec-path' and PATH environment variable to match
+that used by the user's shell.
+
+This is particularly useful under Mac OS X and macOS, where GUI
+apps are not started from a shell."
+  (interactive)
+  (let ((path-from-shell (replace-regexp-in-string
+			  "[ \t\n]*$" "" (shell-command-to-string
+					  "$SHELL -c 'echo $PATH'"
+						    ))))
+    (setenv "PATH" path-from-shell)
+    (setq exec-path (split-string path-from-shell path-separator))))
+
+(set-exec-path-from-shell-PATH)
+
+
 (delete-selection-mode t)
 
 ;; (defun n-move-beginning-of-line (arg)
@@ -87,11 +104,12 @@
 ;;   :config
 ;;   (global-disable-mouse-mode))
 
-;; (use-package perspective
-;;   :custom
-;;   (persp-mode-prefix-key (kbd "C-c C-p"))
-;;   :init
-;;   (persp-mode))
+;; workspaces
+(use-package perspective
+  :custom
+  (persp-mode-prefix-key (kbd "C-c C-p"))
+  :init
+  (persp-mode))
 
 (use-package orderless
   :init
@@ -436,6 +454,13 @@
    (read-only-mode t))
  :hook (compilation-filter . colorize-compilation-buffer))
 
+(use-package hideshowvis
+  :config
+  (setq hideshowvis-symbols t)
+  :hook
+  (prog-mode . hs-minor-mode)
+  (prog-mode . hideshowvis-minor-mode))
+
 ;;; Web
 
 ;; (use-package web-mode
@@ -501,6 +526,38 @@
   (global-semantic-idle-scheduler-mode 1))
 
 ;;; Org
+(use-package org
+  :config
+  (setq org-latex-listings 'minted))
+
+(use-package ox-latex
+  :config
+  (add-to-list 'org-latex-minted-langs '(kelp "scheme"))
+  (let ((texcmd))
+    (setq texcmd "latexmk -pdflatex='xelatex -file-line-error --shell-escape -synctex=1' -pdf %f")
+    (setq org-latex-default-packages-alist
+          '(("" "fontspec" t)
+            ("" "xunicode" t)
+            ("" "url" t)
+            ("" "minted" t)
+            ;; ("" "rotating" t)
+            ;; ("" "memoir-article-styles" t)
+            ;; ("american" "babel" t)
+            ;; ("babel" "csquotes" t)
+            ;; ("" "listings" nil)
+            ("svgnames" "xcolor" t)
+            ("" "soul" t)
+            ("xetex, colorlinks=true, urlcolor=FireBrick, plainpages=false, pdfpagelabels, bookmarksnumbered" "hyperref" nil)))
+    (setq org-latex-classes
+          (cons '("memarticle"
+                  "\\documentclass[11pt,oneside,article]{memoir}"
+                  ("\\section{%s}" . "\\section*{%s}")
+                  ("\\subsection{%s}" . "\\subsection*{%s}")
+                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))
+                org-latex-classes))
+    (setq org-latex-pdf-process (list texcmd))))
 
 (org-babel-do-load-languages 'org-babel-load-languages
                              '((coq . t)))

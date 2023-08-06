@@ -27,8 +27,10 @@
   #:use-module (gnu system pam)
   #:use-module (gnu packages)
   #:use-module (gnu packages wm)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages admin)
   #:use-module (gnu packages shells)
+  #:use-module (gnu packages cups)
   #:use-module (gnu packages freedesktop)
   #:use-module (gnu services)
   #:use-module (gnu services desktop)
@@ -38,6 +40,7 @@
   #:use-module (gnu services vpn)
   #:use-module (gnu services ssh)
   #:use-module (gnu services web)
+  #:use-module (gnu services cups)
   #:use-module (gnu services base)
   #:use-module (gnu services dbus)
   #:use-module (gnu services avahi)
@@ -81,7 +84,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
 (define* (maya-user-account #:key (supplementary-groups '()))
   (user-account
    (name "maya")
-   (comment "Mája")
+   (comment "Maya")
    (shell (file-append zsh "/bin/zsh"))
    (group "users")
    (home-directory "/home/maya")
@@ -95,23 +98,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
      "video"
      "dialout"
      supplementary-groups))))
-
-;; note these need to be updated when configurations are bootstrapped
-;; run sudo cat /etc/wireguard/private.key | wg pubkey
-(define wg-casper-peer
-  (wireguard-peer
-   (name "casper")
-   (public-key "5rD5C1+++mx9oPNTod5qCT7COJ7lQ/E6zO2lkNSSzFY=")
-   (allowed-ips '("192.168.99.0/24" ))))
-(define wg-melchior-peer
-  (wireguard-peer
-   (name "melchior")
-   (endpoint "omase.tk:51820")
-   (public-key "16fC2yp/lZhns8Eqz5fGP4ccQ0aiBnl/7N9mIhmV11Y=")
-   (allowed-ips '("192.168.99.0/24" "192.168.88.0/24"))
-   (keep-alive 25)))
-(define wg-router-peer
-  )
+  
 
 (define melchior
   (magi-config
@@ -123,34 +110,30 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
      (services (append
                 (list
                  (service syncthing-service-type
-			  (syncthing-configuration
-			   (user "maya")
-			   (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000"))))
+                          (syncthing-configuration
+                           (user "maya")
+                           (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000"))))
                  (service ntp-service-type)
-                 polkit-wheel-service
-                 (service polkit-service-type)
-                 (service elogind-service-type)
-                 (dbus-service)
                  (service nginx-service-type
                           (nginx-configuration
                            (server-blocks
                             (list
                              http-redirect-to-https
-                             transmission-nginx-configuration
+                             ;;transmission-nginx-configuration
                              jellyfin-nginx-configuration))))
-                 (service certbot-service-type
-                          (certbot-configuration
-                           (email "maya.omase@disroot.org")
-                           (certificates
-                            (list
-                             transmission-certbot-configuration))))
+                 ;; (service certbot-service-type
+                 ;;          (certbot-configuration
+                 ;;           (email "maya.omase@disroot.org")
+                 ;;           (certificates
+                 ;;            (list
+                 ;;             transmission-certbot-configuration))))
                  (service transmission-daemon-service-type
                           (transmission-daemon-configuration
                            (rpc-authentication-required? #t)
                            (rpc-username "melchior")
                            (rpc-password "{8a6cf535a13132c467ad438d7c71d8d127f2a62ae9J1MkgE")
                            (rpc-whitelist-enabled? #t)
-                           (rpc-whitelist '("::1" "127.0.0.1" "192.168.88.*"))
+                           (rpc-whitelist '("::1" "127.0.0.1" "192.168.88.*" "192.168.99.*"))
                            (download-dir "/media/huge/downloads")
                            (incomplete-dir-enabled? #t)
                            (incomplete-dir "/media/huge/downloads/incomplete")))
@@ -161,8 +144,8 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                            (authorized-keys
                             `(("maya-casper" ,(local-file "configuration/ssh/maya-casper.pub"))))))
                  (service avahi-service-type)
-                 (service wireguard-service-type
-                          (wg-config '("192.168.99.1/32") wg-casper-peer))
+                 ;; (service wireguard-service-type
+                 ;;          (wg-config '("192.168.99.1/32") wg-casper-peer))
                  (service static-networking-service-type
                           (list (static-networking
                                  (addresses
@@ -174,6 +157,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                                          (destination "default")
                                          (gateway "192.168.88.1"))))
                                  (name-servers '("192.168.88.1" "8.8.8.8")))))
+                 (service elogind-service-type)
                  ;; (service nfs-service-type
                  ;;          (nfs-configuration
                  ;;           (exports `(("/media/huge/batocera"
@@ -267,8 +251,8 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                              ,@dbus-services
                              ,@gnupg-services
                              ,@zsh-services
-                             ,@pipewire-services
-                             )))))))))
+                             ,@pipewire-services)))))))))
+                             
 
 (define transform
   (options->transformation
@@ -285,22 +269,33 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
      (keyboard-layout %cz-dvorak-ucw)
      (services (append (list
                         ;;jellyfin-service
-		        (service gnome-desktop-service-type)
-		        (set-xorg-configuration
-		         (xorg-configuration
-		          (keyboard-layout %cz-dvorak-ucw)))
-                        (bluetooth-service #:auto-enable? #t)
+                        (service gnome-desktop-service-type)
+                        (set-xorg-configuration
+                         (xorg-configuration
+                          (keyboard-layout %cz-dvorak-ucw)))
+                        (service bluetooth-service-type
+                                 (bluetooth-configuration
+                                  (auto-enable? #t)))
+                        (service cups-service-type
+                                 (cups-configuration
+                                  (web-interface? #t)
+                                  (extensions
+                                   (list cups-filters epson-inkjet-printer-escpr hplip-minimal))))
                         (service docker-service-type
-			         (docker-configuration))
-		        ;; (service syncthing-service-type
-			;;          (syncthing-configuration
-			;;           (user "maya")
-			;;           (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000")))))
+                                 (docker-configuration))
+                        ;; (service syncthing-service-type
+                        ;;          (syncthing-configuration
+                        ;;           (user "maya")
+                        ;;           (arguments '("--no-browser" "--no-default-folder" "--log-max-size=1000")))))
                         (service spice-vdagent-service-type)
                         (service virtlog-service-type
                                  (virtlog-configuration))
                         (service libvirt-service-type
                                  (libvirt-configuration (unix-sock-group "libvirt")))
+                        (service pam-limits-service-type
+                         (list
+                          (pam-limits-entry "@realtime" 'both 'rtprio 99)
+                          (pam-limits-entry "@realtime" 'both 'memlock 'unlimited))))
                         ;; (service wireguard-service-type
                         ;;          (wireguard-configuration
                         ;;           (addresses '("192.168.99.2/32"))
@@ -312,30 +307,31 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                         ;;              (endpoint "omase.tk:51820")
                         ;;              (public-key "AS8jZ/t+r9CZQZEP2UHp2mv+cD14wiiaqaVUG4gXg2o=")
                         ;;              (allowed-ips '("0.0.0.0/0")))))))
-                        )
+                        
                        magi-services
                        laptop-services
                        (nonguix-desktop-services %desktop-services #:wayland? #t)))
      (packages (append
-	        (operating-system-packages magi-nonguix)
-	        (map specification->package
-		     (list
+                (operating-system-packages magi-nonguix)
+                (map specification->package
+                     (list
                       "wireguard-tools"
-		      "syncthing"
-		      "xf86-input-libinput"
+                      "syncthing"
+                      "xf86-input-libinput"
                       "xf86-video-qxl"
                       "spice"
                       "ovmf"
                       "phodav"
-		      "flatpak"
-		      "fuse"
-		      "podman"
-		      "docker"
+                      "flatpak"
+                      "fuse"
+                      "podman"
+                      "docker"
                       "runc"
-		      "iptables"
-		      "shadow"
-		      "fprintd"
-                      "opensc"))))
+                      "iptables"
+                      "shadow"
+;;                      "fprintd"
+                      "opensc"
+		      "zsh"))))
      (file-systems
       (cons*
        %magi-boot-file-system
@@ -345,23 +341,25 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
            (magi-user-config
             (name "maya")
             (account
-             (maya-user-account #:supplementary-groups '("docker" "libvirt" "kvm")))
+             (maya-user-account #:supplementary-groups '("docker" "libvirt" "kvm" "realtime")))
             (environment
              (home-environment
               (packages `(
-	                  ,@fonts
-;;	                  ,@sway-desktop
+                          ,@fonts
+;;                        ,@sway-desktop
 ;;                        ,@dwl-desktop
                           ,@gnome-desktop
-	                  ,@desktop
+                          ,@desktop
                           ,@math
+                          ,@music
                           ,@virtualization
-	                  ,@cc-toolchain
-;;	                  ,@avr-toolchain
-	                  ,@haskell-toolchain
-                          ,@racket-toolchain
-	                  ,@guile-toolchain
-	                  ,@python-toolchain
+                          ,@cc-toolchain
+                          ,@jvm-toolchain
+;;                        ,@avr-toolchain
+                          ,@haskell-toolchain
+;;                        ,@racket-toolchain
+                          ,@guile-toolchain
+;;                        ,@python-toolchain
                           ,@coq-toolchain
                           ,@apl-toolchain))
               (services
@@ -372,8 +370,8 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                  ,@dbus-services
                  ,@gnupg-services
                  ,@zsh-services
-                 ,@(mail-services "/home/maya/.mail" mail-accounts "Mája Tomášek" mailing-lists)
-                 ,@pipewire-services
-                 )))))))))
+                 ,@(mail-services "/home/maya/.mail" mail-accounts "Maya Tomášek" mailing-lists)
+                 ,@pipewire-services)))))))))
+                 
 
 (dispatcher (list casper balthasar melchior))

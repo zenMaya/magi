@@ -14,9 +14,9 @@
 
 (define-public %grub-efi-bootloader
   (bootloader-configuration
-		(bootloader grub-efi-bootloader)
-		(targets '("/boot/efi"))
-		(keyboard-layout keyboard-layout)))
+                (bootloader grub-efi-bootloader)
+                (targets '("/boot/efi"))
+                (keyboard-layout keyboard-layout)))
 
 (define-public %magi-boot-file-system
   (file-system
@@ -39,11 +39,15 @@
    (keyboard-layout %cz-dvorak-ucw)
    (name-service-switch %mdns-host-lookup-nss)
    (bootloader (bootloader-configuration
-		(bootloader grub-efi-bootloader)
-		(targets '("/boot/efi"))
-		(keyboard-layout %cz-dvorak-ucw)))
+                (bootloader grub-efi-bootloader)
+                (targets '("/boot/efi"))
+                (keyboard-layout %cz-dvorak-ucw)))
    (file-systems %base-file-systems)
    (users '())
+   (groups (cons (user-group
+                  (name "realtime")
+                  (system? #t))
+                 %base-groups))
    (packages (append (map specification->package+output
                           (list
                            "waypipe"
@@ -54,6 +58,7 @@
                            "emacs"
                            "btrfs-progs"
                            "openssh"
-                           "make"))
-		     %base-packages))
+                           "make"
+                           "mosh"))
+                     %base-packages))
    (services %base-services)))

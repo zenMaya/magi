@@ -38,10 +38,11 @@
 		"emacs-cape"
 		"emacs-eglot"
                 "emacs-eldoc"
-		"emacs-tramp"
+;;		"emacs-tramp"
 ;;		"emacs-docker-tramp"
                 "emacs-smartparens"
                 "emacs-polymode"
+                "emacs-hideshowvis"
 ;;; latex
                 "emacs-cdlatex"
 ;;; web
@@ -50,11 +51,12 @@
 ;;; c/c++
                 "emacs-bison-mode"
                 "emacs-highlight-doxygen"
+                "emacs-meson-mode"
 ;;; zig
 ;;; lisp
-		"emacs-geiser"
-		"emacs-geiser-guile"
-                "emacs-geiser-racket"
+;		"emacs-geiser"
+;		"emacs-geiser-guile"
+;               "emacs-geiser-racket"
                 "emacs-racket-mode"
                 "emacs-sly"
 ;;		"emacs-paredit"
@@ -76,6 +78,8 @@
 		"emacs-markdown-mode"
 ;;; csharp
 		"emacs-csharp-mode"
+;;; jvm
+                "emacs-scala-mode"
 		))
 	  (list emacs-bufler emacs-nano-agenda emacs-eldoc-box emacs-zig-mode emacs-flymake-swi-prolog emacs-svelte-mode emacs-maxima emacs-gnu-apl-mode emacs-parinfer-rust-mode)))
 ;emacs-embark-consult emacs-spotify
@@ -87,7 +91,7 @@
 		     (".config/emacs/init.el" ,(local-file "../../configuration/emacs/init.el"))))
    (service home-emacs-service-type
 	    (home-emacs-configuration
-	     (package emacs-next-pgtk)
+	     (package emacs-next)
 	     (xdg-flavor? #t)
 	     (elisp-packages emacs-packages)
              (emacs-servers '(server))))))
