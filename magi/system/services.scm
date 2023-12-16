@@ -14,7 +14,33 @@
   #:use-module (gnu services configuration)
   #:use-module (gnu services authentication)
   #:use-module (gnu services security-token)
-  #:use-module (gnu packages freedesktop))
+  #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages libusb))
+
+(define-configuration/no-serialization usbmuxd-configuration
+  (usbmuxd
+   (file-like usbmuxd)
+   "Usbmuxd package."))
+
+(define usbmuxd-shepherd-service
+  (shepherd-service
+   (documentation "Run usbmuxd daemon.")
+   (provision '(usbmuxd))
+   (requirement '(udev))
+   (start #~(make-forkexec-constructor
+             (list (string-append #$usbmuxd "/sbin/usbmuxd")
+                   "-f")))
+   (stop #~(make-kill-destructor))))
+
+(define usbmuxd-service-type
+  (service-type (name 'usbmuxd)
+                (description "")
+                (extensions
+                 (list
+                  (service-extension shepherd-root-service-type
+                                     (lambda (_)
+                                       (list
+                                         usbmuxd-shepherd-service)))))))
 
 (define-record-type* <fprintd-pam-configuration>
   fprintd-pam-configuration make-fprintd-pam-configuration
@@ -69,6 +95,8 @@
    (service fprintd-service-type)
    (service fprintd-pam-service-type
             (fprintd-pam-configuration))
+   (service usbmuxd-service-type
+            (usbmuxd-configuration))
    (service pcscd-service-type)))
 
 (define-public jellyfin-service

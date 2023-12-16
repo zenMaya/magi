@@ -44,6 +44,8 @@
   #:use-module (gnu packages bash)
   #:use-module (gnu packages cdrom)
   #:use-module (gnu packages cmake)
+  #:use-module (gnu packages maths)
+  #:use-module (gnu packages julia)
   #:use-module (gnu packages compression)
   #:use-module (gnu packages curl)
   #:use-module (gnu packages databases)
@@ -107,6 +109,7 @@
   #:use-module (gnu packages virtualization)
   #:use-module (gnu packages firmware)
   #:use-module (gnu packages spice)
+  #:use-module (gnu packages readline)
 ;;; for custom packages
   #:use-module (guix build-system emacs)
   #:use-module (guix build-system cmake)
@@ -119,6 +122,117 @@
   #:use-module (guix download)
   #:use-module (guix git-download)
   #:use-module (guix packages))
+
+(define-public dotnet-7
+  (let ((dotnet-sdk-version "7.0.8"))
+    (package
+      (inherit (specification->package "dotnet"))
+      (version "7.0.305")
+      (source
+       (origin
+         (method url-fetch/tarbomb)
+         (uri
+          (string-append "https://download.visualstudio.microsoft.com/download/pr/87a55ae3-917d-449e-a4e8-776f82976e91/03380e598c326c2f9465d262c6a88c45/dotnet-sdk-"
+                         version
+                         "-linux-x64.tar.gz"))
+         (sha256
+          (base32
+           "13hhvi3qb72hjw9v71fyf0mdrp5kj09qjxqg04pca3avif1zdcmv"))))
+      (arguments
+       `(#:install-plan
+         `(("." "share/dotnet/"))
+         #:patchelf-plan
+         `(("dotnet"
+            ("gcc:lib" "zlib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version
+                             "/libSystem.Net.Security.Native.so")
+            ("mit-krb5"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version
+                             "/libSystem.Security.Cryptography.Native.OpenSsl.so")
+            ("openssl"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version
+                             "/libSystem.IO.Compression.Native.so")
+            ("zlib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version
+                             "/libcoreclrtraceptprovider.so")
+            ("gcc:lib" "lttng-ust"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/createdump")
+            ("gcc:lib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/libclrjit.so")
+            ("gcc:lib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/libcoreclr.so")
+            ("gcc:lib" "icu4c"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/libhostpolicy.so")
+            ("gcc:lib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/libmscordaccore.so")
+            ("gcc:lib"))
+           (,,(string-append "shared/Microsoft.NETCore.App/"
+                             dotnet-sdk-version "/libmscordbi.so")
+            ("gcc:lib"))
+           (,,(string-append "packs/Microsoft.NETCore.App.Host.linux-x64/"
+                             dotnet-sdk-version
+                             "/runtimes/linux-x64/native/singlefilehost")
+            ("gcc:lib" "openssl" "mit-krb5" "zlib" "icu4c"))
+           (,,(string-append "packs/Microsoft.NETCore.App.Host.linux-x64/"
+                             dotnet-sdk-version
+                             "/runtimes/linux-x64/native/apphost")
+            ("gcc:lib"))
+           (,,(string-append "packs/Microsoft.NETCore.App.Host.linux-x64/"
+                             dotnet-sdk-version
+                             "/runtimes/linux-x64/native/libnethost.so")
+            ("gcc:lib"))
+           (,,(string-append "sdk/" version "/AppHostTemplate/apphost")
+            ("gcc:lib"))
+           (,,(string-append "host/fxr/" dotnet-sdk-version "/libhostfxr.so")
+            ("gcc:lib")))
+         #:phases
+         (modify-phases %standard-phases
+           (add-before 'patchelf 'patchelf-writable
+             (lambda _
+               (for-each make-file-writable (find-files "."))))
+           (add-after 'install 'install-wrapper
+             (lambda* (#:key outputs #:allow-other-keys)
+               (let* ((out (assoc-ref outputs "out"))
+                      (bin-dir (string-append out "/bin"))
+                      (dotnet-target (string-append out "/share/dotnet/dotnet"))
+                      (dotnet-dest (string-append bin-dir "/dotnet")))
+                 (mkdir-p bin-dir)
+                 (symlink dotnet-target dotnet-dest)
+                 ;; First symlink, then wrap-program: dotnet cannot run when renamed
+                 (wrap-program dotnet-dest
+                   ;; Ensure the `dotnet' program does not phone home to share telemetry
+                   `("DOTNET_CLI_TELEMETRY_OPTOUT" = ("1"))))))))))))
+
+(define-public msim
+  (package
+   (name "msim")
+   (version "2.2.0")
+   (native-inputs
+    (list
+     makedepend))
+   (inputs
+    (list
+     readline))
+   (arguments '(#:tests? #f))
+   (source (origin
+            (method url-fetch)
+            (uri "https://github.com/d-iii-s/msim/archive/refs/tags/v2.2.0.tar.gz")
+            (sha256
+             (base32 "1zz1bv40qzh30dzv2ln438ihzgm5pw3pwqbgb0z5akfylwa8zc9n"))))
+   (build-system gnu-build-system)
+   (home-page "")
+   (synopsis "")
+   (description "")
+   (license license:gpl2)))
 
 (define-public decaf-emu
   (package
@@ -189,7 +303,7 @@
 ;;    (arguments
 ;;      (substitute-keyword-arguments (package-arguments sdl)
 ;;        ((#:configure-flags flags)
-;;         `(append '("--disable-wayland-shared" 
+;;         `(append '("--disable-wayland-shared"
 ;;                    "--enable-video-wayland"
 ;;                    "--disable-libdecor-shared"
 ;;                    "--enable-video-kmsdrm" "--disable-kmsdrm-shared"
@@ -351,6 +465,57 @@
 ;;   (description "")
 ;;   (license license:gpl3+)))
 
+(define-public emacs-eglot-java
+  (package
+    (name "emacs-eglot-java")
+    (version "20231210.705")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/yveszoundi/eglot-java.git")
+             (commit "b4b775fa7a52d2bf50a0d7fb1a59a4de7f172538")))
+       (sha256
+        (base32 "1mrlsx931gbdp742gbjai8c2nyvz76y8znrjiv6r6ihhsb9b4plx"))))
+    (build-system emacs-build-system)
+    (propagated-inputs (list emacs-eglot emacs-jsonrpc))
+    (home-page "https://github.com/yveszoundi/eglot-java")
+    (synopsis "Java extension for the eglot LSP client")
+    (description
+     "Java extension for eglot.  Some of the key features include the following: -
+Automatic installation of the Eclipse JDT LSP server (latest milestone release).
+- Ability to pass JVM arguments to the Eclipse JDT LSP server
+(eglot-java-eclipse-jdt-args) - Wizards for Spring starter, Maven and Gradle
+project creation - Generic build command support for Maven and Gradle projects -
+JUnit tests support, this hasn't been tested for a while...  If you're having
+issues with Gradle projects (auto-completion), ensure that you're using the
+gradle wrapper in your projects: - The root cause is likely JVM
+incompatibilities with the bundled Eclipse Gradle version - Check your default
+JDK version - If using a recent Eclipse JDT LS snapshot, check its bundled
+gradle version:
+https://github.com/eclipse/buildship/blob/master/org.gradle.toolingapi/META-INF/MANIFEST.MF
+- Check the gradle compatibility matrix:
+https://docs.gradle.org/current/userguide/compatibility.html - Use the gradle
+wrapper to ensure that you always have a compatible matching JVM version - Edit
+directly your gradle/wrapper/gradle-wrapper.properties - or download the
+matching Gradle version for your JVM and run: gradle wrapper If for any reason,
+you want to prevent \"eglot-java\" from modifying the \"eglot-server-programs\"
+variable, you can toggle the value of the variable
+\"eglot-java-eglot-server-programs-manual-updates\" - upstream \"eglot\" could
+change the syntax of programs associations without notice and it will break this
+package - you may want fine-grained control over how \"eglot-java\" behaves
+accordingly to your emacs customization Below is a sample configuration for your
+emacs init file (add-hook java-mode-hook eglot-java-mode) (add-hook
+eglot-java-mode-hook (lambda () (define-key eglot-java-mode-map (kbd \"C-c l n\")
+#'eglot-java-file-new) (define-key eglot-java-mode-map (kbd \"C-c l x\")
+#'eglot-java-run-main) (define-key eglot-java-mode-map (kbd \"C-c l t\")
+#'eglot-java-run-test) (define-key eglot-java-mode-map (kbd \"C-c l N\")
+#'eglot-java-project-new) (define-key eglot-java-mode-map (kbd \"C-c l T\")
+#'eglot-java-project-build-task) (define-key eglot-java-mode-map (kbd \"C-c l R\")
+#'eglot-java-project-build-refresh))) You can upgrade an existing LSP server
+installation with the \"eglot-java-upgrade-lsp-server\" function.")
+    (license #f)))
+
 (define-public emacs-parinfer-rust-mode
   (package
    (name "emacs-parinfer-rust-mode")
@@ -408,7 +573,7 @@
     (home-page "https://github.com/rougier/nano-theme")
     (synopsis "N Λ N O theme")
     (description
-     "N Λ N O theme is a consistent theme that comes in two flavors: 
+     "N Λ N O theme is a consistent theme that comes in two flavors:
 so@itemize
 @item a light theme that is based on Material (@url{https://material.io/})
 @item a dark theme that is based on Nord (@url{https://www.nordtheme.com/})
@@ -590,24 +755,24 @@ programs.")
 
 (define-public emacs-zig-mode
   (package
-    (name "emacs-zig-mode")
-    (version "20220521.1148")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://github.com/ziglang/zig-mode.git")
-                    (commit "dbc648f5bca8f3b9ca2cc7827f326f5530115144")))
-              (sha256
-               (base32
-                "0hwkkwhc5b2pzyqa2h0xw8wxijsrp1fk70fhyv8hx19shzlc4la3"))))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/zig-lang/zig-mode")
-    (synopsis "A major mode for the Zig programming language")
-    (description
-     "This package provides a major mode for the Zig programming languages.
+   (name "emacs-zig-mode")
+   (version "20230815.2033")
+   (source (origin
+             (method git-fetch)
+             (uri (git-reference
+                   (url "https://github.com/ziglang/zig-mode.git")
+                   (commit "079149a19fc869343130e69d7b944afd3a1813cc")))
+             (sha256 (base32
+                      "1r8mysp3q4zj9mm1hxj00vnycasi0hlmdgqqjl540jcyn86jqw9a"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-reformatter))
+   (home-page "https://github.com/zig-lang/zig-mode")
+   (synopsis "A major mode for the Zig programming language")
+   (description
+    "This package provides a major mode for the Zig programming languages.
 
 See documentation on https://github.com/zig-lang/zig-mode")
-    (license license:gpl3+)))
+   (license license:gpl3+)))
 
 (define-public emacs-spotify
   (package
@@ -678,8 +843,8 @@ your `.emacs file.  If you want any file ending in `.mac to begin in
  maxima-mode) auto-mode-alist)) to your `.emacs file.  for users of use-package,
 the maxima package can be loaded with the form (use-package maxima :init
 (add-hook maxima-mode-hook #'maxima-hook-function) (add-hook
-maxima-inferior-mode-hook #'maxima-hook-function) (setq         
-org-format-latex-options (plist-put org-format-latex-options :scale 2.0)        
+maxima-inferior-mode-hook #'maxima-hook-function) (setq
+org-format-latex-options (plist-put org-format-latex-options :scale 2.0)
 maxima-display-maxima-buffer nil) :mode (\"\\\\.mac\\\\'\" .  maxima-mode)
 :interpreter (\"maxima\" .  maxima-mode))")
     (license #f)))
@@ -702,7 +867,7 @@ maxima-display-maxima-buffer nil) :mode (\"\\\\.mac\\\\'\" .  maxima-mode)
     (description
      "Emacs mode for GNU APL This mode provides both normal editing facilities for APL
 code as well as an interactive mode.  The interactive mode is started using the
-command ‘gnu-apl’.  The mode provides two different ways to input APL symbols.
+ command ‘gnu-apl’.  The mode provides two different ways to input APL symbols.
 The first method is enabled by default, and simply binds keys with the \"super\"
 modifier.  The problem with this method is that the \"super\" modifier has to be
 enabled, and any shortcuts added by the operating system that uses this key has
@@ -799,6 +964,56 @@ workspaces are created dynamically, rather than requiring you to put buffers in
 workspaces manually.")
     (license #f)))
 
+(define-public emacs-fsharp-mode
+  (package
+   (name "emacs-fsharp-mode")
+   (version "20230622.1854")
+   (source (origin
+             (method git-fetch)
+             (uri (git-reference
+                   (url "https://github.com/fsharp/emacs-fsharp-mode.git")
+                   (commit "b4d31c3da018cfbb3d1f9e6fd416d8777f0835bd")))
+             (sha256 (base32
+                      "1rhyc7yhpi4bjzq5f6bm3v4ab16prl6fvp9kjif6lq6ihh8xb520"))))
+   (build-system emacs-build-system)
+   (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
+                            "^dir$"
+                            "^[^/]+.info$"
+                            "^[^/]+.texi$"
+                            "^[^/]+.texinfo$"
+                            "^doc/dir$"
+                            "^doc/[^/]+.info$"
+                            "^doc/[^/]+.texi$"
+                            "^doc/[^/]+.texinfo$")
+                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
+                            "^[^/]+-test.el$" "^[^/]+-tests.el$"
+                            "^eglot-fsharp.el$")))
+   (home-page "unspecified")
+   (synopsis "Support for the F# programming language")
+   (description "No description available.")
+   (license #f)))
+
+(define-public emacs-eglot-fsharp
+  (package
+    (name "emacs-eglot-fsharp")
+    (version "20230324.1942")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/fsharp/emacs-fsharp-mode.git")
+             (commit "b4d31c3da018cfbb3d1f9e6fd416d8777f0835bd")))
+       (sha256
+        (base32 "1rhyc7yhpi4bjzq5f6bm3v4ab16prl6fvp9kjif6lq6ihh8xb520"))))
+    (build-system emacs-build-system)
+    (propagated-inputs (list emacs-eglot emacs-fsharp-mode emacs-jsonrpc))
+    (arguments
+     '(#:include '("^eglot-fsharp.el$")
+       #:exclude '()))
+    (home-page "https://github.com/fsharp/emacs-fsharp-mode")
+    (synopsis "fsharp-mode eglot integration")
+    (description "Lua eglot introduced")
+    (license #f)))
 
 (define dwl-configured
   (package
@@ -813,7 +1028,7 @@ workspaces manually.")
              (commit version)))
        (file-name (string-append (package-name dwl) "-" version))
        (sha256
-        (base32 "17ky2f278dipy9qwapjrg5fkw23qkkpf12rlp0899i41g20r7fj8"))     
+        (base32 "17ky2f278dipy9qwapjrg5fkw23qkkpf12rlp0899i41g20r7fj8"))
        ;; (patches (list
        ;;           (origin
        ;;            (uri "https://git.sr.ht/~raphi/dwl/blob/master/patches/wayland-ipc.patch")
@@ -822,7 +1037,7 @@ workspaces manually.")
        ;;            (sha256
        ;;             (base32 "1q9910ckhnyz2yhmgj38kg1bsyv4nffkb30vr7fs75mfqw013mdhb")))))
        (snippet #~(symlink #$(local-file "../../configuration/dwl/config.h") "config.h"))))))
-       
+
 (define-public nyxt-extra
   (package
     (inherit nyxt)
@@ -860,8 +1075,9 @@ workspaces manually.")
    dwl-configured))
 
 (define-public gnome-desktop
-  (map specification->package
+  (map specification->package+output
        (list
+        "libadwaita"
         "gnome-shell-extension-gsconnect"
         "gnome-shell-extension-sound-output-device-chooser"
         "gnome-tweaks")))
@@ -883,19 +1099,20 @@ workspaces manually.")
 
 (define-public math
   (map specification->package+output
-       (list
-        "maxima"
-        "wxmaxima"
-        "texlive"
-        "python-pygments")))
+       (list)))
+;;        "maxima"
+;;        "wxmaxima"
+;;        "python-pygments")))
 
 (define-public browsers
-  (append 
+  (append
    (map specification->package
         (list
          ;;      "icecat"
          "firefox"))
-   (list nyxt-extra)))
+   '()))
+  ;;(list nyxt-extra)))
+
 
 (define-public desktop
   (append
@@ -908,9 +1125,14 @@ workspaces manually.")
          ;;         "steam-devices-udev-rules"
          "calibre"
          "darktable"
+         "inkscape"
          "mpv"
 ;;;         "gaupol"
          "font-openmoji"
+         "font-google-noto"
+         "font-google-noto-emoji"
+         "font-noto-emoji"
+         "font-noto-color-emoji"
          "transmission-remote-gtk"))))
 
 (define-public games
@@ -942,37 +1164,93 @@ workspaces manually.")
    ovmf
    virt-manager))
 
-(define-public cc-toolchain
+(define-public dev-toolchain
   (map specification->package
        (list
-        "gcc-toolchain"
-        "man-pages"
-        "meson"
-        "ninja"
-        "make"
-        "gdb"
-        "rr"
-        "pkg-config"
-        "cmake"
-        "automake"
-        "autoconf"
-        "libtool"
-        "ccls"
-        ;;"clang-toolchain"
-        "bear"
-        "doxygen"
-        "gmp"
-        "mpfr")))
+        "universal-ctags")))
+
+(define-public texlive-toolchain
+  (map specification->package
+       (list
+        "texlive-base"
+        "texlive-xetex"
+        "texlive-latexmk"
+        "texlive-dvipng"
+        "texlive-hyperref"
+        "texlive-bibtex"
+        "texlive-biblatex"
+        "texlive-biber"
+        "texlive-pgf"
+        "texlive-amsmath"
+        "texlive-fontspec"
+        "texlive-xunicode"
+        "texlive-beamer"
+        ;; for syntax highlighting
+        "python-pygments"
+        "texlive-minted"
+        "texlive-soul"
+        "texlive-xcolor")))
+
+(define-public cc-toolchain
+  (append
+   (list msim)
+   (map specification->package
+        (list
+         "gcc-toolchain"
+         "man-pages"
+         "meson"
+         "ninja"
+         "make"
+         "gdb"
+         "rr"
+         "pkg-config"
+         "cmake"
+         "automake"
+         "autoconf"
+         "libtool"
+         "ccls"
+         "valgrind"
+         "kcachegrind"
+         "glfw"
+;;         "clang-toolchain"
+         "bear"
+         "doxygen"
+         "gmp"
+         "mpfr"
+         "mpc"))))
+
+(define-public ocaml-toolchain
+  (map specification->package
+       (list
+        "ocaml"
+        "dune"
+        "opam")))
+
+(define-public dotnet-toolchain
+  (list dotnet-7))
 
 (define-public jvm-toolchain
-  (map specification->package
+  (map specification->package+output
        (list
-        "openjdk")))
+        "openjdk@20"
+        "openjdk@20:jdk"
+        ;; "maven"
+        ;; "maven-compiler-plugin"
+;;        "maven-jar-plugin"
+;;        "maven-resources-plugin"
+;;        "maven-surefire-plugin"
+;;        "java-surefire-junit4"
+      ;;  "maven-install-plugin"
+        "clojure"
+        "clojure-tools"
+        "leiningen")))
 
-(define-public avr-toolchain
+(define-public jupyter-toolchain
   (map specification->package
        (list
-        "avr-toolchain")))
+        "python"
+;;        "jupyter"
+        "node")))
 
 (define-public haskell-toolchain
   (map specification->package
@@ -986,7 +1264,7 @@ workspaces manually.")
         "hoogle"
         "stylish-haskell"
         "readline")))
-        
+
 
 (define-public guile-toolchain
   (map specification->package
@@ -1001,6 +1279,16 @@ workspaces manually.")
   (map specification->package
        (list
         "racket")))
+
+(define-public commonlisp-toolchain
+  (map specification->package
+       (list
+        "sbcl"
+        "sbcl-cl+ssl"
+        "sbcl-croatoan"
+        "sbcl-sdl2"
+        "sbcl-sdl2-ttf"
+        "sbcl-cffi")))
 
 (define-public python-toolchain
   (map specification->package
@@ -1103,12 +1391,12 @@ workspaces manually.")
                 (bindsym $mod+2 workspace $ws2)
                 (bindsym $mod+Shift+1 move container to workspace $ws1)
                 (bindsym $mod+Shift+2 move container to workspace $ws2)
-                (bindsym $mod+Control+Shift+Left move workspace to output $tv-monitor)          
+                (bindsym $mod+Control+Shift+Left move workspace to output $tv-monitor)
                 (bindsym $mod+Control+Shift+Right move workspace to output $laptop-monitor)
                 (bindsym $mod+Control+Shift+Up    move workspace to output $desktop-monitor)
                 (bindsym $mod+Control+Shift+Down  move workspace to output $laptop-monitor)))))))
                 ;;; Windows
-                
+
 ;; (service home-waybar-service-type
 ;;          (home-waybar-configuration
 ;;           (config
@@ -1119,11 +1407,12 @@ workspaces manually.")
    (simple-service 'flatpak-vars-service home-environment-variables-service-type
                    `(("XDG_DATA_DIRS" . "$XDG_DATA_DIRS:/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share")))
    ;; fixes gnome console bug, remove this once 43 is available
-   (simple-service 'fix-nautilus-gnome-console-buf home-environment-variables-service-type
-                   `(("NAUTILUS_EXTENSION_PATH" . "")))
+   ;; (simple-service 'fix-nautilus-gnome-console-buf home-environment-variables-service-type
+   ;;                 `(("NAUTILUS_EXTENSION_PATH" . "")))
    (simple-service 'config-files
                    home-files-service-type
                    `(;;(".config/sway/the-great-wawe-off-kanagawa.jpg" ,(local-file "../../configuration/sway/the-great-wawe-off-kanagawa.jpg"))
+                     (".config/ctags/zig.ctags" ,(local-file "../../configuration/ctags/zig.ctags"))
                      (".config/waybar/config" ,(local-file "../../configuration/waybar/config"))
                      (".config/waybar/style.css" ,(local-file "../../configuration/waybar/style.css"))
                      (".config/alacritty/alacritty.yml" ,(local-file "../../configuration/alacritty/alacritty.yml"))
@@ -1394,5 +1683,3 @@ alias grep='grep --color=auto'
 ;;      (service-extension activation-service-type
 ;;                         %rainloop-activation)))
 ;;    (default-value (rainloop-configuration))))
-
-

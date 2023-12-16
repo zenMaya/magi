@@ -25,6 +25,7 @@
   #:use-module (gnu system file-systems)
   #:use-module (gnu system shadow)
   #:use-module (gnu system pam)
+  #:use-module (gnu bootloader extlinux)
   #:use-module (gnu packages)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages bash)
@@ -45,7 +46,8 @@
   #:use-module (gnu services dbus)
   #:use-module (gnu services avahi)
   #:use-module (gnu services spice)
-  #:use-module (magi system docker)
+  ;;  #:use-module (magi system docker)
+  #:use-module (gnu services docker)
   #:use-module (gnu services certbot)
   #:use-module (gnu services desktop)
   #:use-module (gnu services syncthing)
@@ -98,7 +100,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
      "video"
      "dialout"
      supplementary-groups))))
-  
+
 
 (define melchior
   (magi-config
@@ -107,6 +109,11 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
     (operating-system
      (inherit magi)
      (host-name "melchior")
+     (packages (append
+                (map specification->package
+                     (list
+                      "php"))
+                (operating-system-packages magi)))
      (services (append
                 (list
                  (service syncthing-service-type
@@ -121,6 +128,8 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                              http-redirect-to-https
                              ;;transmission-nginx-configuration
                              jellyfin-nginx-configuration))))
+                 (service php-fpm-service-type
+                          (php-fpm-configuration))
                  ;; (service certbot-service-type
                  ;;          (certbot-configuration
                  ;;           (email "maya.omase@disroot.org")
@@ -252,7 +261,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                              ,@gnupg-services
                              ,@zsh-services
                              ,@pipewire-services)))))))))
-                             
+
 
 (define transform
   (options->transformation
@@ -281,8 +290,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                                   (web-interface? #t)
                                   (extensions
                                    (list cups-filters epson-inkjet-printer-escpr hplip-minimal))))
-                        (service docker-service-type
-                                 (docker-configuration))
+                        (service docker-service-type)
                         ;; (service syncthing-service-type
                         ;;          (syncthing-configuration
                         ;;           (user "maya")
@@ -307,7 +315,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                         ;;              (endpoint "omase.tk:51820")
                         ;;              (public-key "AS8jZ/t+r9CZQZEP2UHp2mv+cD14wiiaqaVUG4gXg2o=")
                         ;;              (allowed-ips '("0.0.0.0/0")))))))
-                        
+
                        magi-services
                        laptop-services
                        (nonguix-desktop-services %desktop-services #:wayland? #t)))
@@ -317,6 +325,8 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                      (list
                       "wireguard-tools"
                       "syncthing"
+                      "xorg-server-xwayland"
+                      "xf86-input-synaptics"
                       "xf86-input-libinput"
                       "xf86-video-qxl"
                       "spice"
@@ -324,14 +334,14 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                       "phodav"
                       "flatpak"
                       "fuse"
-                      "podman"
-                      "docker"
+;;                      "podman"
+;;                      "docker"
                       "runc"
                       "iptables"
                       "shadow"
 ;;                      "fprintd"
                       "opensc"
-		      "zsh"))))
+                      "zsh"))))
      (file-systems
       (cons*
        %magi-boot-file-system
@@ -341,7 +351,7 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
            (magi-user-config
             (name "maya")
             (account
-             (maya-user-account #:supplementary-groups '("docker" "libvirt" "kvm" "realtime")))
+             (maya-user-account #:supplementary-groups '("libvirt" "kvm" "realtime")))
             (environment
              (home-environment
               (packages `(
@@ -353,12 +363,19 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                           ,@math
                           ,@music
                           ,@virtualization
+                          ,@dev-toolchain
+                          ,@texlive-toolchain
                           ,@cc-toolchain
+                          ,@ocaml-toolchain
+                          ,@dotnet-toolchain
                           ,@jvm-toolchain
+                          ,@jupyter-toolchain
+;;                        ,@julia-toolchain
 ;;                        ,@avr-toolchain
                           ,@haskell-toolchain
-;;                        ,@racket-toolchain
+                          ,@racket-toolchain
                           ,@guile-toolchain
+;;                        ,@commonlisp-toolchain
 ;;                        ,@python-toolchain
                           ,@coq-toolchain
                           ,@apl-toolchain))
@@ -372,6 +389,6 @@ KERNEL==\"hidraw*\", KERNELS==\"*054C:0CE6*\", MODE=\"0660\", TAG+=\"uaccess\"")
                  ,@zsh-services
                  ,@(mail-services "/home/maya/.mail" mail-accounts "Maya Tomášek" mailing-lists)
                  ,@pipewire-services)))))))))
-                 
+
 
 (dispatcher (list casper balthasar melchior))

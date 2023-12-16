@@ -2,6 +2,7 @@
   #:use-module (ice-9 match)
   #:use-module (magi system)
   #:use-module (guix gexp)
+  #:use-module (gnu packages xorg)
   #:use-module (gnu system)
   #:use-module (gnu services)
   #:use-module (gnu services base)
@@ -27,8 +28,8 @@
                                                   (append (list "https://substitutes.nonguix.org")
                                                           %default-substitute-urls))
                                                  (authorized-keys
-                                                  (cons (plain-file "nonguix-key.pub" "(public-key 
- (ecc 
+                                                  (cons (plain-file "nonguix-key.pub" "(public-key
+ (ecc
   (curve Ed25519)
   (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
   )
@@ -38,5 +39,11 @@
                    (gdm-service-type config => (gdm-configuration
                                                 (inherit config)
                                                 (wayland? wayland?)
+                                                (xorg-configuration
+                                                 (xorg-configuration
+                                                  (server (if wayland?
+                                                              xorg-server-xwayland
+                                                              xorg-server))))
+                                                ;; im keeping this for the later generations
                                                 (auto-login? (if (equal? #f autologin) #f #t))
                                                 (default-user autologin)))))

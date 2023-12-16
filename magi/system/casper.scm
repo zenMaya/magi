@@ -65,8 +65,8 @@
 		     (xorg-configuration
 		      (keyboard-layout %cz-dvorak-ucw)))
 		    (bluetooth-service #:auto-enable? #t)
-                    (service tlp-service-type
-                             (tlp-configuration))
+                    ;; (service tlp-service-type
+                    ;;          (tlp-configuration))
 		    (service docker-service-type
 			     (docker-configuration))
 		    (service syncthing-service-type
@@ -85,6 +85,7 @@
 	    (operating-system-packages magi)
 	    (map specification->package
 		 (list
+                  "power-profiles-daemon"
 		  "syncthing"
 		  "sway"
 		  "xf86-input-libinput"

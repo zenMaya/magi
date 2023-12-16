@@ -43,6 +43,10 @@
                 (targets '("/boot/efi"))
                 (keyboard-layout %cz-dvorak-ucw)))
    (file-systems %base-file-systems)
+   (swap-devices
+    (list
+     (swap-space
+      (target (file-system-label "swap")))))
    (users '())
    (groups (cons (user-group
                   (name "realtime")
